@@ -1,9 +1,10 @@
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import swaggerUi from 'swagger-ui-express';
-import { env } from './shared/config/env';
+import { env, resolveCorsOrigin } from './shared/config/env';
 import { openApiSpec } from './shared/http/docs/openapi';
 import { errorHandler, notFoundHandler } from './shared/http/middleware/errorHandler';
 import { requestIdMiddleware } from './shared/http/middleware/requestId';
@@ -24,11 +25,12 @@ app.use(requestIdMiddleware);
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(
   cors({
-    origin: env.CORS_ORIGIN === '*' ? true : env.CORS_ORIGIN.split(',').map((s) => s.trim()),
+    origin: resolveCorsOrigin(),
     credentials: true,
   }),
 );
 app.use(express.json({ limit: '1mb' }));
+app.use(cookieParser());
 if (env.NODE_ENV !== 'test') {
   app.use(morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 }

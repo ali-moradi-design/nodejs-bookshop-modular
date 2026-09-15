@@ -3,13 +3,22 @@ import { AppError } from '@shared/errors/AppError';
 import { asyncHandler } from '@shared/http/asyncHandler';
 import { authContextService } from '../../infra/wiring';
 import { hasAllPermissions, hasAnyPermission } from '../../domain/rules/hasPermission';
+import { ACCESS_TOKEN_COOKIE, readCookie } from '../cookies/authCookies';
+
+function resolveAccessToken(req: Request): string | undefined {
+  const header = req.headers.authorization;
+  if (header?.startsWith('Bearer ')) {
+    const token = header.slice(7).trim();
+    if (token) return token;
+  }
+  return readCookie(req, ACCESS_TOKEN_COOKIE);
+}
 
 export const authenticate = asyncHandler(async (req: Request, _res: Response, next: NextFunction) => {
-  const header = req.headers.authorization;
-  if (!header?.startsWith('Bearer ')) {
+  const token = resolveAccessToken(req);
+  if (!token) {
     throw new AppError('Authentication required', 401);
   }
-  const token = header.slice(7);
   req.user = await authContextService.fromAccessToken(token);
   next();
 });
