@@ -1,5 +1,5 @@
 {
-  "name": "nodejs-bookshop-modular",
+  "name": "nodejs-bookshop-modular-monolith",
   "version": "1.0.0",
   "description": "Bookstore API — Modular Monolith (MongoDB/Mongoose)",
   "main": "dist/server.js",
